@@ -12,16 +12,41 @@ python_group = next(group for group in Group.list() if group.group_id == bot.gro
 
 
 while True:
-	old = sys.stdout
+	newest = None
 	try:
 		newest = python_group.messages().newest
-		text = newest.text
-		redirected = sys.stdout = StringIO()
-		exec(text)
-		sys.stdout = old
-		print(redirected.getvalue())
-		bot.post(redirected.getvalue())
 	except:
-		sys.stdout = old
-		print("code failed")
+		print("failed to connect")
+		continue
+	
+
+	old = sys.stdout
+	old_e = sys.stderr
+
+	text = newest.text
+	#text = input("Enter something: ")
+	
+	if text.startswith(">"):
+
+		if "import os" in text:
+			bot.post("Get the fuck out of here")		
+			continue
+
+		out = sys.stdout = StringIO()
+		try:
+			exec(text[1:])
+			sys.stdout = old
+			out = out.getvalue()
+			print(out)
+		except Exception as e:
+			sys.stdout = old
+			out = str(e)
+			print(e)
+			print("execution failed")
+		try:
+			bot.post(out)
+		except Exception as e:
+			print(e)
+			print("shit went wrong")
+
 
